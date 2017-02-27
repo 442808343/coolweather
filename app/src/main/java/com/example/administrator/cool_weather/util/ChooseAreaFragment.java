@@ -2,10 +2,12 @@ package com.example.administrator.cool_weather.util;
 
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.cool_weather.R;
+import com.example.administrator.cool_weather.WeatherActivity;
 import com.example.administrator.cool_weather.db.City;
 import com.example.administrator.cool_weather.db.County;
 import com.example.administrator.cool_weather.db.Province;
@@ -50,7 +53,7 @@ public class ChooseAreaFragment extends Fragment{
     private List<County> countyList;
     private Province selectedProvince;
     private City selectedCity;
-    private int currentLevel;
+    private int currentLevel = 0;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Nullable
@@ -78,6 +81,14 @@ public class ChooseAreaFragment extends Fragment{
                 }else if(currentLevel ==LEVEL_CITY){
                     selectedCity = cityList.get(position);
                     queryCounties();
+                    Log.d("currentLevel", currentLevel+"");
+                }else if(currentLevel == LEVEL_COUNTY){
+                    Log.d("Fragment", "start WeatherActivity");
+                    String weatherId = countyList.get(position).getWeatherId();
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                    intent.putExtra("weather_id", weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -115,7 +126,7 @@ public class ChooseAreaFragment extends Fragment{
     private void queryCities(){
         titleText.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
-        cityList = DataSupport.where("provinceid = ?", String.valueOf(selectedProvince.getId())).find(City.class);
+        cityList = DataSupport.where("provinceid=?", String.valueOf(selectedProvince.getId())).find(City.class);
         if(cityList.size() > 0){
             dataList.clear();
             for(City city : cityList){
@@ -134,7 +145,7 @@ public class ChooseAreaFragment extends Fragment{
     private void queryCounties(){
         titleText.setText(selectedCity.getCityName());
         backButton.setVisibility(View.VISIBLE);
-        countyList = DataSupport.where("cityid = ?", String.valueOf(selectedCity.getId())).find(County.class);
+        countyList = DataSupport.where("cityid=?", String.valueOf(selectedCity.getId())).find(County.class);
         if(countyList.size() > 0){
             dataList.clear();
             for(County county : countyList){
@@ -146,7 +157,7 @@ public class ChooseAreaFragment extends Fragment{
         }else {
             int provinceCode = selectedProvince.getProvinceCode();
             int cityCode = selectedCity.getCityCode();
-            String address = "http://guolin.tech/api/china/" + provinceCode
+            String address = "http://guolin.tech/api/china/" + provinceCode + "/"
                     + cityCode;
             queryFromServer(address, "county");
         }
