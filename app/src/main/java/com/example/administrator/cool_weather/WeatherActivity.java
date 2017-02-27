@@ -93,7 +93,6 @@ public class WeatherActivity extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         String bingPic = prefs.getString("bing_pic", null);
-        Log.d("share_bingPic", bingPic);
         if(bingPic != null){
             Glide.with(this).load(bingPic).into(bingPicImg);
         }else{
